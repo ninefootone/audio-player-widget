@@ -1,22 +1,22 @@
 <?php
 /**
- * Sermon Player Widget for Elementor.
+ * Audio Player Widget for Elementor.
  *
- * @package ChurchSermonsPlayer
+ * @package AudioPlayerWidget
  */
 
-namespace ChurchSermonsPlayer;
+namespace AudioPlayerWidget;
 
 defined( 'ABSPATH' ) || exit;
 
-class Sermon_Player_Widget extends \Elementor\Widget_Base {
+class Audio_Player_Widget extends \Elementor\Widget_Base {
 
     public function get_name(): string {
-        return 'sermon_player';
+        return 'apw_audio_player';
     }
 
     public function get_title(): string {
-        return esc_html__( 'Sermon Audio Player', 'church-sermons-player' );
+        return esc_html__( 'Audio Player', 'audio-player-widget' );
     }
 
     public function get_icon(): string {
@@ -28,14 +28,11 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
     }
 
     public function get_keywords(): array {
-        return [ 'sermon', 'audio', 'player', 'plyr', 'resource' ];
+        return [ 'audio', 'player', 'plyr', 'acf', 'sermon', 'podcast' ];
     }
 
-    /**
-     * Enqueue Plyr only when this widget is actually present on the page.
-     */
     public function get_script_depends(): array {
-        return [ 'csp-init' ];
+        return [ 'apw-init' ];
     }
 
     public function get_style_depends(): array {
@@ -52,27 +49,51 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->start_controls_section(
             'section_content',
             [
-                'label' => esc_html__( 'Sermon Audio', 'church-sermons-player' ),
+                'label' => esc_html__( 'Audio Source', 'audio-player-widget' ),
                 'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+            ]
+        );
+
+        $this->add_control(
+            'source_type',
+            [
+                'label'   => esc_html__( 'Source Type', 'audio-player-widget' ),
+                'type'    => \Elementor\Controls_Manager::SELECT,
+                'default' => 'url',
+                'options' => [
+                    'url' => esc_html__( 'Direct URL', 'audio-player-widget' ),
+                    'acf' => esc_html__( 'ACF Field', 'audio-player-widget' ),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'audio_url',
+            [
+                'label'       => esc_html__( 'Audio URL', 'audio-player-widget' ),
+                'type'        => \Elementor\Controls_Manager::URL,
+                'placeholder' => 'https://example.com/audio.mp3',
+                'condition'   => [ 'source_type' => 'url' ],
             ]
         );
 
         $this->add_control(
             'acf_field_slug',
             [
-                'label'       => esc_html__( 'ACF Field Slug', 'church-sermons-player' ),
+                'label'       => esc_html__( 'ACF Field Slug', 'audio-player-widget' ),
                 'type'        => \Elementor\Controls_Manager::TEXT,
-                'default'     => 'resource_audio',
-                'description' => esc_html__( 'The ACF field slug that stores the audio attachment ID.', 'church-sermons-player' ),
+                'default'     => 'audio_file',
+                'description' => esc_html__( 'The ACF field slug that stores the audio attachment ID.', 'audio-player-widget' ),
+                'condition'   => [ 'source_type' => 'acf' ],
             ]
         );
 
         $this->add_control(
             'fallback_message',
             [
-                'label'   => esc_html__( 'No Audio Message', 'church-sermons-player' ),
+                'label'   => esc_html__( 'No Audio Message', 'audio-player-widget' ),
                 'type'    => \Elementor\Controls_Manager::TEXT,
-                'default' => esc_html__( 'Audio unavailable for this sermon.', 'church-sermons-player' ),
+                'default' => esc_html__( 'Audio unavailable.', 'audio-player-widget' ),
             ]
         );
 
@@ -82,7 +103,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->start_controls_section(
             'section_style',
             [
-                'label' => esc_html__( 'Player Style', 'church-sermons-player' ),
+                'label' => esc_html__( 'Player Style', 'audio-player-widget' ),
                 'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
             ]
         );
@@ -90,7 +111,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'accent_color',
             [
-                'label'     => esc_html__( 'Player Background', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Player Background', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => '#f97316',
                 'selectors' => [
@@ -102,12 +123,12 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'button_bg_color',
             [
-                'label'     => esc_html__( 'Button Background', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Button Background', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => 'transparent',
                 'selectors' => [
                     '{{WRAPPER}} .plyr--audio .plyr__controls button,
-                    {{WRAPPER}} .plyr--audio .plyr__controls [type=button]' => 'background-color: {{VALUE}} !important;',
+                     {{WRAPPER}} .plyr--audio .plyr__controls [type=button]' => 'background-color: {{VALUE}} !important;',
                 ],
             ]
         );
@@ -115,7 +136,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'button_color',
             [
-                'label'     => esc_html__( 'Button Icon Colour', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Button Icon Colour', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => '#ffffff',
                 'selectors' => [
@@ -128,7 +149,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'button_hover_color',
             [
-                'label'     => esc_html__( 'Button Hover Background', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Button Hover Background', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => '#000000',
                 'selectors' => [
@@ -143,7 +164,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'button_hover_icon_color',
             [
-                'label'     => esc_html__( 'Button Hover Icon Colour', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Button Hover Icon Colour', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => '#ffffff',
                 'selectors' => [
@@ -158,7 +179,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'progress_color',
             [
-                'label'     => esc_html__( 'Progress Bar Colour', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Progress Bar Colour', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => '#ffffff',
                 'selectors' => [
@@ -170,7 +191,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'volume_color',
             [
-                'label'     => esc_html__( 'Volume Bar Colour', 'church-sermons-player' ),
+                'label'     => esc_html__( 'Volume Bar Colour', 'audio-player-widget' ),
                 'type'      => \Elementor\Controls_Manager::COLOR,
                 'default'   => '#ffffff',
                 'selectors' => [
@@ -182,7 +203,7 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'player_border_radius',
             [
-                'label'      => esc_html__( 'Border Radius', 'church-sermons-player' ),
+                'label'      => esc_html__( 'Border Radius', 'audio-player-widget' ),
                 'type'       => \Elementor\Controls_Manager::SLIDER,
                 'size_units' => [ 'px', 'em' ],
                 'range'      => [
@@ -203,31 +224,42 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
     // -------------------------------------------------------------------------
 
     protected function render(): void {
-        $settings   = $this->get_settings_for_display();
-        $field_slug = sanitize_key( $settings['acf_field_slug'] ?? 'resource_audio' );
+        $settings = $this->get_settings_for_display();
+        $audio_url = '';
 
-        // get_field() requires ACF to be active.
-        if ( ! function_exists( 'get_field' ) ) {
-            if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
-                echo '<p>' . esc_html__( 'ACF is not active.', 'church-sermons-player' ) . '</p>';
+        if ( $settings['source_type'] === 'acf' ) {
+
+            if ( ! function_exists( 'get_field' ) ) {
+                if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                    echo '<p>' . esc_html__( 'ACF is not active.', 'audio-player-widget' ) . '</p>';
+                }
+                return;
             }
-            return;
+
+            $field_slug = sanitize_key( $settings['acf_field_slug'] ?? 'audio_file' );
+            $audio_id   = get_field( $field_slug );
+            $audio_url  = $audio_id ? wp_get_attachment_url( (int) $audio_id ) : '';
+
+        } else {
+
+            $audio_url = $settings['audio_url']['url'] ?? '';
+
         }
 
-        $audio_id  = get_field( $field_slug );
-        $audio_url = $audio_id ? wp_get_attachment_url( (int) $audio_id ) : false;
-
-        // ── Editor placeholder when no audio is attached ──────────────────
+        // ── Editor placeholder when no audio is set ───────────────────────
         if ( ! $audio_url ) {
             if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                $mode = $settings['source_type'] === 'acf'
+                    ? 'ACF field "' . esc_html( $settings['acf_field_slug'] ) . '"'
+                    : 'Direct URL';
                 echo '<div style="padding:1rem;background:#f3f4f6;border-radius:6px;color:#6b7280;font-size:0.875rem;">'
-                    . esc_html__( 'Sermon Player: no audio found for field "', 'church-sermons-player' )
-                    . esc_html( $field_slug )
-                    . '".</div>';
+                    . esc_html__( 'Audio Player: no audio found for ', 'audio-player-widget' )
+                    . esc_html( $mode )
+                    . '.</div>';
             } else {
                 $fallback = $settings['fallback_message'] ?? '';
                 if ( $fallback ) {
-                    echo '<p class="csp-no-audio">' . esc_html( $fallback ) . '</p>';
+                    echo '<p class="apw-no-audio">' . esc_html( $fallback ) . '</p>';
                 }
             }
             return;
@@ -235,31 +267,32 @@ class Sermon_Player_Widget extends \Elementor\Widget_Base {
 
         // ── Player markup ─────────────────────────────────────────────────
         ?>
-        <div class="csp-player-wrap">
+        <div class="apw-player-wrap">
             <audio
-                class="csp-sermon-audio"
+                class="apw-audio"
                 controls
                 playsinline
                 preload="metadata"
                 data-plyr-config='{"controls":["play","progress","current-time","duration","mute","volume"]}'
             >
                 <source src="<?php echo esc_url( $audio_url ); ?>" type="audio/mpeg">
-                <?php esc_html_e( 'Your browser does not support the audio element.', 'church-sermons-player' ); ?>
+                <?php esc_html_e( 'Your browser does not support the audio element.', 'audio-player-widget' ); ?>
             </audio>
         </div>
         <?php
     }
 
     /**
-     * Render a static placeholder in the Elementor editor (no JS execution).
+     * Render a static placeholder in the Elementor editor.
      */
     protected function content_template(): void {
         ?>
         <#
-        var fieldSlug = settings.acf_field_slug || 'resource_audio';
+        var sourceType = settings.source_type || 'url';
+        var sourceLabel = sourceType === 'acf' ? 'ACF field: ' + settings.acf_field_slug : 'Direct URL';
         #>
         <div style="padding:1rem;background:#f3f4f6;border-radius:6px;color:#6b7280;font-size:0.875rem;">
-            Sermon Player — field: <strong>{{ fieldSlug }}</strong><br>
+            Audio Player — {{ sourceLabel }}<br>
             <em>Audio will render on the front end.</em>
         </div>
         <?php
