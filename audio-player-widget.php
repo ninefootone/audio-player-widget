@@ -3,7 +3,7 @@
  * Plugin Name: Audio Player Widget
  * Plugin URI:  https://github.com/ninefootone/audio-player-widget
  * Description: Registers a custom Elementor widget that renders a Plyr audio player. Supports direct URL input or an ACF attachment field.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      ninefootone creative
  * Author URI:  https://www.ninefootone.co.uk
  * Text Domain: audio-player-widget
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'APW_VERSION', '1.0.0' );
+define( 'APW_VERSION', '1.0.1' );
 define( 'APW_PLYR_VERSION', '3.7.8' );
 define( 'APW_FILE', __FILE__ );
 define( 'APW_DIR', plugin_dir_path( __FILE__ ) );
