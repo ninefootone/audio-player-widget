@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create release zip
+        run: |
+          cd ..
+          # IMPORTANT: zip root folder must remain "audio-player-widget/" — PUC matches
+          # the folder name to the plugin slug. Do not rename or restructure.
+          zip -r audio-player-widget.zip audio-player-widget/ \
+            --exclude "*.git*" \
+            --exclude "*/.github/*" \
+            --exclude "*/node_modules/*" \
+            --exclude "*/.DS_Store" \
+            --exclude "audio-player-widget/lib/**/.git" \
+            --exclude "audio-player-widget/lib/**/.git/*"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ../audio-player-widget.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
