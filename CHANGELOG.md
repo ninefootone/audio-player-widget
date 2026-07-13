@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] — 2026-07-13
+
+### Added
+- Optional playback **Speed Control** (Elementor toggle in the Audio Source section). When enabled, the player shows a settings menu with 0.75×–2× options.
+- **Default Speed** control to set the starting playback rate (shown when Speed Control is enabled).
+
 ## [1.0.1] — 2026-06-10
 
 ### Fixed

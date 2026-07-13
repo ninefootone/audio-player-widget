@@ -97,6 +97,37 @@ class Audio_Player_Widget extends \Elementor\Widget_Base {
             ]
         );
 
+        $this->add_control(
+            'show_speed',
+            [
+                'label'        => esc_html__( 'Speed Control', 'audio-player-widget' ),
+                'type'         => \Elementor\Controls_Manager::SWITCHER,
+                'label_on'     => esc_html__( 'Show', 'audio-player-widget' ),
+                'label_off'    => esc_html__( 'Hide', 'audio-player-widget' ),
+                'return_value' => 'yes',
+                'default'      => '',
+                'description'  => esc_html__( 'Adds a settings menu with playback speed options.', 'audio-player-widget' ),
+            ]
+        );
+
+        $this->add_control(
+            'default_speed',
+            [
+                'label'     => esc_html__( 'Default Speed', 'audio-player-widget' ),
+                'type'      => \Elementor\Controls_Manager::SELECT,
+                'default'   => '1',
+                'options'   => [
+                    '0.5' => '0.5×',
+                    '1'   => '1× (normal)',
+                    '1.5' => '1.5×',
+                    '2'   => '2×',
+                    '3'   => '3×',
+                    '5'   => '5×',
+                ],
+                'condition' => [ 'show_speed' => 'yes' ],
+            ]
+        );
+
         $this->end_controls_section();
 
         // ── Style ─────────────────────────────────────────────────────────────
@@ -265,6 +296,22 @@ class Audio_Player_Widget extends \Elementor\Widget_Base {
             return;
         }
 
+        // ── Build Plyr config ─────────────────────────────────────────────
+        $controls = [ 'play', 'progress', 'current-time', 'duration', 'mute', 'volume' ];
+        $plyr_config = [ 'controls' => $controls ];
+
+        if ( ( $settings['show_speed'] ?? '' ) === 'yes' ) {
+            $controls[]              = 'settings';
+            $plyr_config['controls'] = $controls;
+            $plyr_config['settings'] = [ 'speed' ];
+            $plyr_config['speed']    = [
+                'selected' => (float) ( $settings['default_speed'] ?? 1 ),
+                'options'  => [ 0.5, 1, 1.5, 2, 3, 5 ],
+            ];
+        }
+
+        $plyr_config_json = wp_json_encode( $plyr_config );
+
         // ── Player markup ─────────────────────────────────────────────────
         ?>
         <div class="apw-player-wrap">
@@ -273,7 +320,7 @@ class Audio_Player_Widget extends \Elementor\Widget_Base {
                 controls
                 playsinline
                 preload="metadata"
-                data-plyr-config='{"controls":["play","progress","current-time","duration","mute","volume"]}'
+                data-plyr-config='<?php echo esc_attr( $plyr_config_json ); ?>'
             >
                 <source src="<?php echo esc_url( $audio_url ); ?>" type="audio/mpeg">
                 <?php esc_html_e( 'Your browser does not support the audio element.', 'audio-player-widget' ); ?>
