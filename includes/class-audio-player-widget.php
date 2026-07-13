@@ -121,8 +121,6 @@ class Audio_Player_Widget extends \Elementor\Widget_Base {
                     '1'   => '1× (normal)',
                     '1.5' => '1.5×',
                     '2'   => '2×',
-                    '3'   => '3×',
-                    '5'   => '5×',
                 ],
                 'condition' => [ 'show_speed' => 'yes' ],
             ]
@@ -306,7 +304,7 @@ class Audio_Player_Widget extends \Elementor\Widget_Base {
             $plyr_config['settings'] = [ 'speed' ];
             $plyr_config['speed']    = [
                 'selected' => (float) ( $settings['default_speed'] ?? 1 ),
-                'options'  => [ 0.5, 1, 1.5, 2, 3, 5 ],
+                'options'  => [ 0.5, 1, 1.5, 2 ],
             ];
         }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.1] — 2026-07-13
+
+### Changed
+- Trimmed playback speed options to 0.5×, 1×, 1.5×, 2× (removed 3× and 5×, which were too fast for spoken-word content).
+
 ## [1.1.0] — 2026-07-13
 
 ### Added
